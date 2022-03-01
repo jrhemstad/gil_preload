@@ -17,7 +17,7 @@ namespace // begin anonymous
     nvtx3::event_attributes gil_waiting_attr;
     nvtx3::event_attributes gil_holding_attr;
 
-    using lock_func_t = int (*)(pthread_mutex_t*);
+    using lock_func_t = int(*)(pthread_mutex_t*);
     using unlock_func_t = int(*)(pthread_mutex_t*);
 
     static lock_func_t real_mutex_lock;
@@ -26,7 +26,7 @@ namespace // begin anonymous
 
     bool is_gil(pthread_mutex_t const *const m)
     {
-        return m == GIL_acq_mutex;
+        return initialized && (m == GIL_acq_mutex);
     }
 
     void push_if_gil(pthread_mutex_t const *mutex, nvtx3::event_attributes const &attr)
