@@ -14,11 +14,8 @@ namespace // begin anonymous
 
     struct GILDomain{ static constexpr char const* name{"Python GIL"}; };
 
-    nvtx3::registered_string<GILDomain> gil_waiting_msg{"Waiting for GIL"};
-    nvtx3::event_attributes gil_waiting_attr{gil_waiting_msg, nvtx3::rgb{255, 0, 0}};
-
-    nvtx3::registered_string<GILDomain> gil_holding_msg{"Holding GIL"};
-    nvtx3::event_attributes gil_holding_attr{gil_waiting_msg, nvtx3::rgb{0, 255, 0}};
+    nvtx3::event_attributes gil_waiting_attr;
+    nvtx3::event_attributes gil_holding_attr;
 
     using lock_func_t = int (*)(pthread_mutex_t*);
     using unlock_func_t = int(*)(pthread_mutex_t*);
@@ -53,6 +50,12 @@ namespace // begin anonymous
 // To be called from Cython/Python after acquiring the GIL
 void set_initialized()
 {
+    // Can't call NVTX during library load, so put them in the explicit init function
+    static nvtx3::registered_string<GILDomain> gil_waiting_msg{"Waiting for GIL"};
+    static nvtx3::registered_string<GILDomain> gil_holding_msg{"Holding GIL"};
+    gil_waiting_attr = nvtx3::event_attributes{gil_waiting_msg, nvtx3::rgb{255, 0, 0}};
+    gil_holding_attr = nvtx3::event_attributes{gil_waiting_msg, nvtx3::rgb{0, 255, 0}};
+
     initialized = true;
 }
 
